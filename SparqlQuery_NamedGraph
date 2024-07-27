@@ -1,0 +1,23 @@
+prefix fvc: <http://w3id.org/FAIRVASC#> 
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+prefix xsd: <http://www.w3.org/2001/XMLSchema#> 
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+Select distinct ?patientID ?StartDate ?StopDate
+from Named <http://w3id.org/FAIRVASC/graph>
+Where {
+  GRAPH <http://w3id.org/FAIRVASC/graph> {
+ ?patient a fvc:Patient;
+           fvc:patientID "12";
+           fvc:hasPatientOverview ?patientoverview.
+  # Retrieve the relapse event and date
+  ?patientoverview fvc:relapseDate ?relapseDate.
+  # Calculate the date range
+  BIND(xsd:dateTime(?relapseDate) - "P1M"^^xsd:duration AS ?oneMonthBefore)
+  BIND(xsd:dateTime(?relapseDate) + "P1M"^^xsd:duration AS ?oneMonthAfter)
+  # Retrieve medications within the date range
+  ?patientoverview fvc:hasTreatment ?treatment.
+  ?treatment fvc:treatmentType ?treatmentType.
+  ?patientoverview fvc:StartDate ?StartDate. 
+  ?patientoverview fvc:StopDate ?StopDate.    
+        FILTER ((?StartDate >= ?oneMonthBefore) && (?StopDate <= ?oneMonthAfter))
+    }}
