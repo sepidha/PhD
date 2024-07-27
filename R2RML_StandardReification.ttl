@@ -1,0 +1,75 @@
+<#statement>
+	rr:logicalTable [ rr:sqlQuery """
+	SELECT 			
+		RECORD_ID,
+		STOP_DATE||'T00:00:00' AS STOP_DATE,
+		START_DATE||'T00:00:00' AS START_DATE,
+		DRUG_SELECTED_CHOICES,
+		CASE 
+			WHEN DRUG_SELECTED_CHOICES = 1 THEN 'C769' 
+			WHEN DRUG_SELECTED_CHOICES = 2 THEN 'C405' 
+			WHEN DRUG_SELECTED_CHOICES = 3 THEN 'C290' 
+			WHEN DRUG_SELECTED_CHOICES = 4 THEN 'C1468' 
+			WHEN DRUG_SELECTED_CHOICES = 5 THEN 'C642'  
+			WHEN DRUG_SELECTED_CHOICES = 6 THEN 'Other' 
+			WHEN DRUG_SELECTED_CHOICES = 7 THEN 'C174788' 
+		END AS DRUG_ENCODING,
+	FROM RKD
+		""" ];
+	
+	rr:subjectMap [
+		rr:template "http://w3id.org/FAIRVASC/resource/rkd/patient/patientoverview/treatment/statement/{RECORD_ID}{DRUG_ENCODING}{START_DATE}{STOP_DATE}";
+		rr:class fvc:statement;
+	] ;
+	
+
+	rr:predicateObjectMap [
+		rr:predicate rdf:subject;
+		rr:objectMap [
+		rr:parentTriplesMap <#patient_overview> ;
+		rr:joinCondition [
+			rr:child "RECORD_ID" ;
+			rr:parent "RECORD_ID" ;
+		] ;
+		] ;
+	];
+
+rr:predicateObjectMap [
+		rr:predicate rdf:object;
+		rr:objectMap [
+		rr:parentTriplesMap <#treatment> ;
+		rr:joinCondition [
+			rr:child "RECORD_ID" ;
+			rr:parent "RECORD_ID" ;
+		] ;
+		] ;
+	];
+
+rr:predicateObjectMap [
+		rr:predicate rdf:predicate;
+		rr:objectMap [
+		rr:parentTriplesMap <#hasTreatment> ;
+		rr:joinCondition [
+			rr:child "RECORD_ID" ;
+			rr:parent "RECORD_ID" ;
+		] ;
+		] ;
+	];
+
+ 	rr:predicateObjectMap [
+		rr:predicate fvc:StartDate;
+		rr:objectMap [ 
+			rr:column "START_DATE" ;
+			rr:datatype xsd:dateTime;
+		];
+    ];	
+
+        rr:predicateObjectMap [
+		rr:predicate fvc:StopDate;
+		rr:objectMap [ 
+			rr:column "STOP_DATE";
+			rr:datatype xsd:dateTime;
+		];
+    ];	
+.
+

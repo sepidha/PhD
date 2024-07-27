@@ -1,0 +1,56 @@
+<#patient_overview>
+
+	rr:logicalTable [ rr:sqlQuery """SELECT 
+		RECORD_ID,
+		STOP_DATE||'T00:00:00' AS STOP_DATE,
+		START_DATE||'T00:00:00' AS START_DATE,
+		DRUG_SELECTED_CHOICES,
+		RELAPSE_DATE ||'T00:00:00' AS RELAPSE_DATE
+	FROM RKD""" ];
+	
+	rr:subjectMap [
+		rr:template "http://w3id.org/FAIRVASC/resource/rkd/patient/patientoverview/{RECORD_ID}/{START_DATE}{STOP_DATE}" ;
+		rr:class fvc:PatientOverview;
+		## named graph
+		rr:graph <http://w3id.org/FAIRVASC/graph> ;
+	] ;
+
+	
+		rr:predicateObjectMap [
+		rr:predicate fvc:hasTreatment;
+		rr:objectMap [
+		rr:parentTriplesMap <#treatment> ;
+		rr:joinCondition [
+			rr:child "RECORD_ID" ;
+			rr:parent "RECORD_ID" ;
+		] ;
+		] ;
+	];
+
+
+	rr:predicateObjectMap [
+		rr:predicate fvc:relapseDate;
+		rr:objectMap [ 
+			rr:column "RELAPSE_DATE";
+			rr:datatype xsd:dateTime;
+		];
+    ];	
+
+	rr:predicateObjectMap [
+		rr:predicate fvc:StartDate;
+		rr:objectMap [ 
+			rr:column "START_DATE" ;
+			rr:datatype xsd:dateTime;
+		];
+    ];	
+
+        rr:predicateObjectMap [
+		rr:predicate fvc:StopDate;
+		rr:objectMap [ 
+			rr:column "STOP_DATE";
+			rr:datatype xsd:dateTime;
+		];
+    ];	
+
+.
+
