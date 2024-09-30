@@ -1,0 +1,258 @@
+Temporal Queries:
+
+1. Explicit temporal 	
+
+Time point	Q1: Which patients used drug with ncit:C769 as a treatment on 2019-08-01?
+Time interval	Q2: Which patients used drug with ncit:C769 as a treatment between 2016-07-18 until 2016-07-25?
+
+2. Implicit temporal 	
+
+Time Interval	Q3: Which medications used by patient=12, 1 month before and 1 month after his/her relapse?
+Time point	Q4: Which medications used by patient=12 before his/her relapse?
+
+3. Ordinal temporal 	
+
+Time point	Q5: What is the first drug used by patient with ID=12 after his/her relapse?
+Time interval	Q6: What is the duration of second use of drug with ncit:C769 for patient with ID=12?
+
+4. Temporal answers	
+
+Time interval	Q7: What is the duration of using a drug with ncit:C769 for a patient with ID=12?
+Time point	Q8: What are the dates of use of drug with ncit:C769 for patient with ID=12?
+		
+===================================================================================================================================
+
+1. Explicit temporal 	
+
+Time point	Q1: Which patients used drug with ncit:C769 as a treatment on 2019-08-01?
+
+
+****************************************RDFt
+
+
+prefix fvc: <http://w3id.org/FAIRVASC#> 
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+prefix xsd: <http://www.w3.org/2001/XMLSchema#> 
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+prefix rdft: <http://www.neu.edu/2018/rdft-syntax-ns#>
+Select distinct ?patientID ?hasStartTime ?hasEndTime
+Where {?patient a fvc:Patient;
+fvc:patientID ?patientID;
+fvc:hasPatientOverview ?PatientOverview.
+?PatientOverview fvc:hasTreatment ?treatment.
+?treatment fvc:treatmentType <http://identifiers.org/ncit:C769>.
+?statement rdf:subject ?PatientOverview.
+?statement rdf:predicate ?hasTreatment. 
+?statement rdf:object ?treatment.    
+?hasTreatment rdft:hasStartTime ?hasStartTime. 
+?hasTreatment rdft:hasEndTime ?hasEndTime.    
+FILTER (?hasStartTime = "2019-08-01T00:00:00"^^xsd:dateTime)}
+
+============================================================================================================
+
+1. Explicit temporal 	
+
+Time interval	Q2: Which patients used prednisone as a treatment between 2016-07-18 until 2016-07-25?
+
+
+****************************************RDFt
+
+prefix fvc: <http://w3id.org/FAIRVASC#> 
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+prefix xsd: <http://www.w3.org/2001/XMLSchema#> 
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+prefix rdft: <http://www.neu.edu/2018/rdft-syntax-ns#>
+Select distinct ?patientID ?hasStartTime ?hasEndTime
+Where {?patient a fvc:Patient;
+fvc:patientID ?patientID;
+fvc:hasPatientOverview ?PatientOverview.
+?PatientOverview fvc:hasTreatment ?treatment.
+?treatment fvc:treatmentType <http://identifiers.org/ncit:C769>.
+?statement rdf:subject ?PatientOverview.
+?statement rdf:predicate ?hasTreatment. 
+?statement rdf:object ?treatment.    
+?hasTreatment rdft:hasStartTime ?hasStartTime. 
+?hasTreatment rdft:hasEndTime ?hasEndTime.    
+FILTER ((?hasStartTime = "2019-08-01T00:00:00"^^xsd:dateTime) && (?hasEndTime <= "2020-08-01T00:00:00"^^xsd:dateTime))}
+
+============================================================================================================
+2. Implicit temporal 	
+
+Time Interval	Q3: Which medications used by patient=12, 1 month before and 1 month after his/her relapse?
+
+
+****************************************RDFt
+
+PREFIX fvc: <http://w3id.org/FAIRVASC#> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+prefix rdft: <http://www.neu.edu/2018/rdft-syntax-ns#>
+SELECT DISTINCT  ?treatmentType ?relapseDate ?hasStartTime ?hasEndTime
+WHERE { ?patient a fvc:Patient;
+           fvc:patientID "12";
+           fvc:hasPatientOverview ?PatientOverview.
+  ?PatientOverview fvc:relapseDate ?relapseDate.
+  BIND(xsd:dateTime(?relapseDate) - "P1M"^^xsd:duration AS ?oneMonthBefore)
+  BIND(xsd:dateTime(?relapseDate) + "P1M"^^xsd:duration AS ?oneMonthAfter)
+  ?PatientOverview fvc:hasTreatment ?treatment.
+  ?treatment fvc:treatmentType ?treatmentType.
+  ?statement rdf:subject ?PatientOverview.
+  ?statement rdf:predicate ?hasTreatment. 
+  ?statement rdf:object ?treatment.    
+  ?hasTreatment rdft:hasStartTime ?hasStartTime. 
+  ?hasTreatment rdft:hasEndTime ?hasEndTime.    
+  FILTER (?hasStartTime >= ?oneMonthBefore && ?hasStartTime <= ?oneMonthAfter)}
+
+============================================================================================================
+
+
+2. Implicit temporal 	
+
+Time point	Q4: Which medications used by patient=12 before his/her relapse?
+
+****************************************RDFt
+
+PREFIX fvc: <http://w3id.org/FAIRVASC#> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX rdft: <http://www.neu.edu/2018/rdft-syntax-ns#>
+SELECT DISTINCT  ?treatmentType ?relapseDate ?hasStartTime ?hasEndTime
+WHERE {?patient a fvc:Patient;
+           fvc:patientID "12";
+           fvc:hasPatientOverview ?PatientOverview.
+  ?PatientOverview fvc:relapseDate ?relapseDate.
+  ?PatientOverview fvc:hasTreatment ?treatment.
+  ?treatment fvc:treatmentType ?treatmentType.
+  ?statement rdf:subject ?PatientOverview.
+  ?statement rdf:predicate ?hasTreatment. 
+  ?statement rdf:object ?treatment.    
+  ?hasTreatment rdft:hasStartTime ?hasStartTime. 
+  ?hasTreatment rdft:hasEndTime ?hasEndTime.    
+  FILTER (?hasStartTime >= ?relapseDate)}
+
+
+============================================================================================================
+
+
+3. Ordinal temporal 	
+
+Time point	Q5: What is the first drug used by patient with ID=12 after his/her relapse?
+
+
+****************************************RDFt
+
+PREFIX fvc: <http://w3id.org/FAIRVASC#> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX rdft: <http://www.neu.edu/2018/rdft-syntax-ns#>
+SELECT DISTINCT ?treatmentType ?relapseDate ?hasStartTime ?hasEndTime
+WHERE {?patient a fvc:Patient;
+           fvc:patientID "12";
+           fvc:hasPatientOverview ?PatientOverview.
+  ?PatientOoverview fvc:relapseDate ?relapseDate.
+  ?PatientOverview fvc:hasTreatment ?treatment.
+  ?treatment fvc:treatmentType ?treatmentType.
+  ?statement rdf:subject ?PatientOverview;
+             rdf:predicate ?hasTreatment;
+             rdf:object ?treatment.
+  ?hasTreatment rdft:hasStartTime ?hasStartTime. 
+  ?hasTreatment rdft:hasEndTime ?hasEndTime.
+  FILTER (?hasStartTime > ?relapseDate)}
+ORDER BY ?hasStartTime
+LIMIT 1
+
+
+============================================================================================================
+
+
+3. Ordinal temporal 	
+
+Time interval	Q6: What is the duration of second use of drug with ncit:C769 for patient with ID=12?
+
+
+****************************************RDFt
+
+PREFIX fvc: <http://w3id.org/FAIRVASC#> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX rdft: <http://www.neu.edu/2018/rdft-syntax-ns#>
+PREFIX ofn: <http://www.ontotext.com/sparql/functions/>
+SELECT DISTINCT ?treatmentType ?relapseDate ?hasStartTime ?hasEndTime ?duration
+WHERE {
+  ?patient a fvc:Patient;
+           fvc:patientID "12";
+           fvc:hasPatientOverview ?patientoverview.
+  ?patientoverview fvc:relapseDate ?relapseDate.
+  ?patientoverview fvc:hasTreatment ?treatment.
+  ?treatment fvc:treatmentType ?treatmentType.
+  ?statement rdf:subject ?patientoverview;
+             rdf:predicate ?hasTreatment;
+             rdf:object ?treatment.
+  ?hasTreatment rdft:hasStartTime ?hasStartTime. 
+  ?hasTreatment rdft:hasEndTime ?hasEndTime.
+  BIND(ofn:daysBetween(?hasStartTime, ?hasEndTime) AS ?duration)}
+ORDER BY ?hasStartTime
+LIMIT 1
+OFFSET 1
+
+============================================================================================================
+
+
+4. Temporal answers	
+
+Time interval	Q7: What is the duration of using a drug with ncit:C769 for a patient with ID=12?
+
+
+****************************************RDFt
+
+
+PREFIX fvc: <http://w3id.org/FAIRVASC#> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX rdft: <http://www.neu.edu/2018/rdft-syntax-ns#>
+PREFIX ofn: <http://www.ontotext.com/sparql/functions/>
+SELECT DISTINCT ?treatmentType ?relapseDate ?hasStartTime ?hasEndTime ?duration
+WHERE {?patient a fvc:Patient;
+           fvc:patientID "12";
+           fvc:hasPatientOverview ?patientoverview.
+  ?patientoverview fvc:relapseDate ?relapseDate.
+  ?patientoverview fvc:hasTreatment ?treatment.
+  ?treatment fvc:treatmentType ?treatmentType.
+  ?statement rdf:subject ?patientoverview;
+             rdf:predicate ?hasTreatment;
+             rdf:object ?treatment.
+  ?hasTreatment rdft:hasStartTime ?hasStartTime. 
+  ?hasTreatment rdft:hasEndTime ?hasEndTime.
+  BIND(ofn:daysBetween(?hasStartTime, ?hasEndTime) AS ?duration)}
+
+============================================================================================================
+
+4. Temporal answers	
+
+Time point	Q8: What are the dates of use of drug with ncit:C769 for patient with ID=12?
+
+
+****************************************RDFt
+
+PREFIX fvc: <http://w3id.org/FAIRVASC#> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX ofn: <http://www.ontotext.com/sparql/functions/> 
+PREFIX rdft: <http://www.neu.edu/2018/rdft-syntax-ns#>
+SELECT DISTINCT ?patientID ?treatmentType ?hasStartTime ?hasEndTime 
+WHERE {?patient a fvc:Patient;
+           fvc:patientID "12";
+           fvc:hasPatientOverview ?PatientOverview.
+  ?PatientOverview fvc:hasTreatment ?treatment.
+  ?treatment fvc:treatmentType <http://identifiers.org/ncit:C769>.
+  ?statement rdf:subject ?patientoverview;
+             rdf:predicate ?hasTreatment;
+             rdf:object ?treatment.
+             ?hasTreatment rdft:hasStartTime ?hasStartTime. 
+  			 ?hasTreatment rdft:hasEndTime ?hasEndTime.}
